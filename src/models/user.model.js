@@ -51,8 +51,9 @@ const userSchema=new Schema({
 )
 
 userSchema.pre("save",async function(next){
+    //dont use arrow function because it does not have this
     if(!this.isModified('password')) return next();
-    this.password=bcrypt.hash(this.password,10)
+    this.password= await bcrypt.hash(this.password,10) //takes time to encrypt
     next()
 })
 
@@ -75,9 +76,6 @@ userSchema.methods.generateAccessToken=async function (){
 userSchema.methods.generateRefreshToken=async function (){
     return jwt.sign({
         _id:this._id,
-        email:this.email,
-        username:this.username,
-        fullName:this.fullName,
     },
     process.env.REFRESH_TOKEN_SECRET,
     {
@@ -87,3 +85,5 @@ userSchema.methods.generateRefreshToken=async function (){
 }
 
 export const User=mongoose.model("User",userSchema)
+
+//this user can directly connect with mongodb database
