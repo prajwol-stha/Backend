@@ -51,16 +51,17 @@ const userSchema=new Schema({
 )
 
 userSchema.pre("save",async function(next){
-    //dont use arrow function because it does not have this
+    //dont use arrow function because it does not have #this
     if(!this.isModified('password')) return next();
     this.password= await bcrypt.hash(this.password,10) //takes time to encrypt
     next()
 })
 
 userSchema.methods.isPasswordCorrect=async function (password){
-    await bcrypt.compare(password,this.password)    //this.password is encrypted one
+    
+    return await bcrypt.compare(password,this.password)    //this.password is encrypted one
 }
-userSchema.methods.generateAccessToken=async function (){
+userSchema.methods.generateAccessToken= function (){
     return jwt.sign({
         _id:this._id,
         email:this.email,
@@ -69,17 +70,19 @@ userSchema.methods.generateAccessToken=async function (){
     },
     process.env.ACCESS_TOKEN_SECRET,
     {
-        expiresIn:process.env.ACCESS_TOKEN_EXPIRY
+        // expiresIn:process.env.ACCESS_TOKEN_EXPIRY
+        expiresIn:1000
     }
 )
 }
-userSchema.methods.generateRefreshToken=async function (){
+userSchema.methods.generateRefreshToken= function (){
     return jwt.sign({
         _id:this._id,
     },
     process.env.REFRESH_TOKEN_SECRET,
     {
-        expiresIn:process.env.REFRESH_TOKEN_EXPIRY
+        // expiresIn:process.env.REFRESH_TOKEN_EXPIRY
+        expiresIn:3600
     }
 )
 }
